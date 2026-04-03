@@ -1,14 +1,10 @@
 from fastapi import FastAPI, UploadFile, File
 from fastapi.responses import FileResponse
-import openai
 import uuid
 import os
 from gtts import gTTS
 
 app = FastAPI()
-
-# Set your OpenAI API key here
-openai.api_key = "YOUR_OPENAI_API_KEY"
 
 @app.post("/process_audio/")
 async def process_audio(file: UploadFile = File(...)):
@@ -16,28 +12,18 @@ async def process_audio(file: UploadFile = File(...)):
     audio_path = f"temp_{uuid.uuid4()}.wav"
     with open(audio_path, "wb") as f:
         f.write(await file.read())
-    
-    # Transcribe audio
-    transcription = openai.Audio.transcriptions.create(
-        model="whisper-1",
-        file=open(audio_path)
-    )
-    text = transcription["text"]
 
-    # ChatGPT response
-    response = openai.ChatCompletion.create(
-        model="gpt-4",
-        messages=[{"role": "user", "content": text}]
-    )
-    reply_text = response["choices"][0]["message"]["content"]
+    # 🔥 Fake processing (NO API)
+    text = "Hello Nova"
+    reply_text = "I am Nova. Your system is working perfectly."
 
-    # Convert reply to audio (TTS)
-    tts = gTTS(reply_text)
+    # Convert reply to speech
     output_audio = f"reply_{uuid.uuid4()}.mp3"
+    tts = gTTS(reply_text)
     tts.save(output_audio)
 
-    # Clean up uploaded audio
+    # Clean up input file
     os.remove(audio_path)
 
-    # Return audio file to ESP32
+    # Return audio file
     return FileResponse(output_audio, media_type="audio/mpeg")
