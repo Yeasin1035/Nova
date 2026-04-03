@@ -1,5 +1,5 @@
 from fastapi import FastAPI, UploadFile, File
-from fastapi.responses import FileResponse
+from fastapi.responses import StreamingResponse
 import uuid
 import os
 from gtts import gTTS
@@ -26,4 +26,4 @@ async def process_audio(file: UploadFile = File(...)):
     os.remove(audio_path)
 
     # Return audio file
-    return FileResponse(output_audio, media_type="audio/mpeg")
+    return StreamingResponse(open(output_audio, "rb"), media_type="audio/mpeg")
