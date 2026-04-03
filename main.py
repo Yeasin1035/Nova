@@ -3,6 +3,7 @@ from fastapi.responses import FileResponse
 import uuid
 import os
 from gtts import gTTS
+import requests
 
 app = FastAPI()
 
@@ -14,9 +15,20 @@ async def process_audio(file: UploadFile = File(...)):
         f.write(await file.read())
 
     # 🔥 Fake processing (NO API)
-    text = "Hello Nova"
-    reply_text = "I am Nova. Your system is working perfectly."
+   # Fake transcription for now (we'll replace later)
+text = "Hello Nova"
 
+# Send to Ollama
+ollama_url = "http://localhost:11434/api/generate"
+
+payload = {
+    "model": "mistral",
+    "prompt": text,
+    "stream": False
+}
+
+response = requests.post(ollama_url, json=payload)
+reply_text = response.json()["response"]
     # Convert reply to speech
     output_audio = f"reply_{uuid.uuid4()}.mp3"
     tts = gTTS(reply_text)
