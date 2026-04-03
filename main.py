@@ -14,21 +14,20 @@ async def process_audio(file: UploadFile = File(...)):
     with open(audio_path, "wb") as f:
         f.write(await file.read())
 
-    # 🔥 Fake processing (NO API)
-   # Fake transcription for now (we'll replace later)
-text = "Hello Nova"
+    # Fake transcription
+    text = "Hello Nova"
 
-# Send to Ollama
-ollama_url = "http://localhost:11434/api/generate"
+    # Send to Ollama
+    ollama_url = "http://localhost:11434/api/generate"
+    payload = {
+        "model": "mistral",
+        "prompt": text,
+        "stream": False
+    }
 
-payload = {
-    "model": "mistral",
-    "prompt": text,
-    "stream": False
-}
+    response = requests.post(ollama_url, json=payload)
+    reply_text = response.json()["response"]
 
-response = requests.post(ollama_url, json=payload)
-reply_text = response.json()["response"]
     # Convert reply to speech
     output_audio = f"reply_{uuid.uuid4()}.mp3"
     tts = gTTS(reply_text)
@@ -37,9 +36,8 @@ reply_text = response.json()["response"]
     # Clean up input file
     os.remove(audio_path)
 
-    # Return audio file
     return FileResponse(
-    output_audio,
-    media_type="audio/mpeg",
-    filename="nova_reply.mp3"
-)
+        output_audio,
+        media_type="audio/mpeg",
+        filename="nova_reply.mp3"
+    )
